@@ -7,6 +7,16 @@ from usb.backend import libusb1
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
+import os
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 # declare constants
 # 1. product ID
 # 0x0072 = Razer Mamba Wireless Receiver (i.e., 2.4GHz)
@@ -105,7 +115,7 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
 
     # Create the icon
-    icon = QIcon("icon.png")
+    icon = QIcon(resource_path("icon.png"))
 
     # Create the tray
     tray = QSystemTrayIcon()
