@@ -4,25 +4,27 @@ import logging
 import usb.core
 import usb.util
 from usb.backend import libusb1
-from win10toast import ToastNotifier
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 # declare constants
 # 1. product ID
 # 0x0072 = Razer Mamba Wireless Receiver (i.e., 2.4GHz)
 # 0x0073 = Razer Mamba Wireless (i.e., when plugged in as wired mouse)
 # see README.md for instruction to find the device ID for your mouse
-WIRELESS_RECEIVER = 0x0072
-WIRELESS_WIRED = 0x0073
+WIRELESS_RECEIVER = 0x00A6
+WIRELESS_WIRED = 0x00A5
 # 2. transaction_id.id
 # 0x3f for Razer Mamba Wireless
 # see README.md for instruction to find the correct transaction_id.id for your mouse
-TRAN_ID = b"\x3f"
+TRAN_ID = b"\x1f"
 
 
 def get_mouse():
     """
     Function that checks whether the mouse is plugged in or not
-    :return: [mouse, wireless]: a list that stores (1) a Device object that represents the mouse; and
+    :return: [mouse, wireless]: a list that stores 
+    (1) a Device object that represents the mouse; and
     (2) a boolean for stating if the mouse is in wireless state (True) or wired state (False)
     """
     # declare backend: libusb1.0
@@ -69,7 +71,7 @@ def get_battery():
     """
     Function for getting the battery level of a Razer Mamba Wireless, or other device if adapted
     :return: a string with the battery level as a percentage (0 - 100)
-    """
+    """ 
     # find the mouse and the state, see get_mouse() for detail
     [mouse, wireless] = get_mouse()
     # the message to be sent to the mouse, see battery_msg() for detail
@@ -99,8 +101,37 @@ def get_battery():
 if __name__ == "__main__":
     battery = get_battery()
     logging.info(f"Battery level obtained: {battery}")
-    toaster = ToastNotifier()
+    app = QApplication([])
+    app.setQuitOnLastWindowClosed(False)
+
+    # Create the icon
+    icon = QIcon("icon.png")
+
+    # Create the tray
+    tray = QSystemTrayIcon()
+    tray.setIcon(icon)
+    tray.setVisible(True)
+
+    # Create the menu
+    menu = QMenu()
+    action = QAction("A menu item")
+    menu.addAction(action)
+
+    # Add a Quit option to the menu.
+    quit = QAction("Quit")
+    quit.triggered.connect(app.quit)
+    menu.addAction(quit)
+
+    # Add the menu to the tray
+    tray.setContextMenu(menu)
+    tray.setToolTip(battery+'%')
+    app.exec()
+
+
+
+    """toaster = ToastNotifier()
     toaster.show_toast("Mamba Wireless Battery",
                        f"{battery}% Battery Left",
                        icon_path="mamba_wireless.ico",
                        duration=10)
+"""
